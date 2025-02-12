@@ -1,14 +1,16 @@
 <script setup>
 import { ref } from 'vue';
-
+import { fetchPromise } from './utils';
+import { getIDPokemon } from './utils/getID';
 // ref state
 let htmlPokemon = ref('');
 let htmlPokemonTypes = ref('');
 let valueSearch = ref('');
+let filteredPokemons = ref([]);
 // end ref state
 
 let pokemons = JSON.parse(localStorage.getItem("pokemonsData")) || [];
-let filteredPokemons = pokemons;
+filteredPokemons.value = pokemons;
 let offset = 0;
 let limit = 36;
 
@@ -20,18 +22,6 @@ let limit = 36;
 //         timeout = setTimeout(() => func.apply(this, args), wait);
 //     };
 // }
-
-// begin fetchAPI
-async function fetchPromise(URL) {
-    try {
-        const response = await fetch(URL);
-        return await response.json();
-    } catch (error) {
-        console.error("Lỗi khi fetch dữ liệu:", error);
-        return null;
-    }
-}
-// end fetchAPI
 
 // begin create pokemon types
 function createPokemonType(types) {
@@ -89,15 +79,15 @@ async function render() {
 async function getPokemon()
 {
     if (pokemons.length) {
-        filteredPokemons = pokemons;
-        render();
+        filteredPokemons.value = pokemons;
+        // render();
     } else {
         const response = await fetchPromise("https://pokeapi.co/api/v2/pokemon/?offset=0&limit=898");
         if (response && response.results) {
             pokemons = response.results;
-            filteredPokemons = pokemons;
+            filteredPokemons.value = pokemons;
             localStorage.setItem("pokemonsData", JSON.stringify(pokemons));
-            render();
+            // render();
         }
     }
 };
@@ -108,7 +98,7 @@ function handleSearch()
 {
     offset = 0;
     htmlPokemon.value = '';
-    filteredPokemons = pokemons.filter((pokemon) => {
+    filteredPokemons.value = pokemons.filter((pokemon) => {
         return pokemon.name.includes(valueSearch.value.toLowerCase());
     })
     render();
@@ -119,7 +109,7 @@ function handleLoadMore()
 }
 // end event handler function
 getPokemon();
-
+console.log(filteredPokemons.value);
 </script>
 
 <template>
@@ -128,7 +118,14 @@ getPokemon();
             <h2>Pokemon API</h2>
         </div>
         <input type="text" placeholder="Search some Pokemon" class="poke-search" v-model="valueSearch" @input="handleSearch">
-        <div class="poke-list" v-html="htmlPokemon"></div>
+        <div class="poke-list">
+            <div class="poke-item" v-for="pokemon in filteredPokemons" :key="pokemon">
+                <div class="item__id">#{{ getIDPokemon(pokemon.url) }}</div>
+                <img class="item__image" :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getIDPokemon(pokemon.url)}.png`">
+                <h3 class="item__name">{{pokemon.name}}</h3>
+                <div class="flex-types"></div>
+            </div>
+        </div>
         <button class="load-page-btn" @click="handleLoadMore">Load More</button>
     </div>
 </template>
