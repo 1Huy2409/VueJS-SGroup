@@ -1,115 +1,50 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { fetchPromise } from './utils';
 import { getIDPokemon } from './utils/getID';
+import PokeItem from './components/PokeItem.vue';
 // ref state
-let htmlPokemon = ref('');
-let htmlPokemonTypes = ref('');
-let valueSearch = ref('');
 let filteredPokemons = ref([]);
+let offset = ref(0);
+let limit = 36;
+const renderPokemons = computed(() => {
+    return filteredPokemons.value.slice(offset, offset.value + limit);
+})
 // end ref state
 
 let pokemons = JSON.parse(localStorage.getItem("pokemonsData")) || [];
 filteredPokemons.value = pokemons;
-let offset = 0;
-let limit = 36;
-
-// delay start function
-// function debounce(func, wait) {
-//     let timeout;
-//     return function(...args) {
-//         clearTimeout(timeout);
-//         timeout = setTimeout(() => func.apply(this, args), wait);
-//     };
-// }
-
-// begin create pokemon types
-function createPokemonType(types) {
-    htmlPokemonTypes.value = '';
-    const typesName = types.map(type => type.type.name);
-    typesName.forEach((item) => {
-        htmlPokemonTypes.value += 
-        `<div class="type-item ${item}">${item}</div>
-        `;
-    });
-}
-// end create pokemon types
-// begin create pokemon element
-function createPokemonElement(pokemon) {
-    createPokemonType(pokemon.types);
-    return `
-        <div class="poke-item">
-            <div class="item__id">#${pokemon.id}</div>
-            <img class="item__image" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png" alt="${pokemon.name}">
-            <h3 class="item__name">${pokemon.name}</h3>
-            <div class="flex-types" v-html="htmlPokemonTypes"></div>
-        </div>
-    `;
-}
-// end create pokemon element
-
-// begin set up list of promises
-function createPromiseList() {
-    const pokePromise = [];
-    const renderLimit = offset + limit;
-    for (; offset < renderLimit; offset++) {
-        const pokemon = filteredPokemons[offset];
-        if (!pokemon) {
-            break;
-        }
-        const promise = fetchPromise(pokemon.url);
-        pokePromise.push(promise);
-    }
-    return Promise.all(pokePromise);
-}
-// end set up list of promises
-
-// begin render pokemon
-async function render() {
-    const pokeData = await createPromiseList();
-    pokeData.forEach((pokemon) => {
-        if (pokemon) {
-            htmlPokemon.value += createPokemonElement(pokemon);
-        }
-    });
-}
-// end render pokemon
 
 //begin getPokemon (refresh website => localStorage ....)
 async function getPokemon()
 {
     if (pokemons.length) {
         filteredPokemons.value = pokemons;
-        // render();
     } else {
-        const response = await fetchPromise("https://pokeapi.co/api/v2/pokemon/?offset=0&limit=898");
+        const response = await fetchPromise("https://pokeapi.co/api/v2/pokemon/?.value=0&limit=898");
         if (response && response.results) {
             pokemons = response.results;
             filteredPokemons.value = pokemons;
             localStorage.setItem("pokemonsData", JSON.stringify(pokemons));
-            // render();
         }
     }
 };
 // end getPokemon
-
-// begin event handler function
-function handleSearch()
+function handleSearch(event) 
 {
-    offset = 0;
-    htmlPokemon.value = '';
+    const query = event.target.value;
     filteredPokemons.value = pokemons.filter((pokemon) => {
-        return pokemon.name.includes(valueSearch.value.toLowerCase());
+        return pokemon.name.includes(query.toLowerCase());
     })
-    render();
+    offset.value = 0;
+
 }
 function handleLoadMore()
 {
-    render();
+    offset.value += limit;
 }
 // end event handler function
 getPokemon();
-console.log(filteredPokemons.value);
 </script>
 
 <template>
@@ -117,16 +52,11 @@ console.log(filteredPokemons.value);
         <div class="header">
             <h2>Pokemon API</h2>
         </div>
-        <input type="text" placeholder="Search some Pokemon" class="poke-search" v-model="valueSearch" @input="handleSearch">
+        <input type="text" placeholder="Search some Pokemon" class="poke-search" @input="handleSearch">
         <div class="poke-list">
-            <div class="poke-item" v-for="pokemon in filteredPokemons" :key="pokemon">
-                <div class="item__id">#{{ getIDPokemon(pokemon.url) }}</div>
-                <img class="item__image" :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getIDPokemon(pokemon.url)}.png`">
-                <h3 class="item__name">{{pokemon.name}}</h3>
-                <div class="flex-types"></div>
-            </div>
+            <PokeItem v-for="pokemon in renderPokemons" :key="getIDPokemon(pokemon.url)" :pokemon="pokemon"/>
         </div>
-        <button class="load-page-btn" @click="handleLoadMore">Load More</button>
+        <button v-show="renderPokemons.length >= limit" class="load-page-btn" @click="handleLoadMore">Load More</button>
     </div>
 </template>
 
