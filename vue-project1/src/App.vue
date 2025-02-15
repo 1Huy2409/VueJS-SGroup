@@ -78,13 +78,13 @@ getPokemon();
 .poke-list
 {
     display: grid;
-    grid-template-columns: auto auto auto auto auto auto;
+    grid-template-columns: repeat(6, auto);
     /* justify-content: space-between; */
     margin-top: 50px;
 }
 .poke-search
 {
-    max-width: 500px;
+    max-width: 400px;
     width: 100%;
     margin-top: 50px;
     margin-bottom: 20px;
@@ -210,17 +210,23 @@ getPokemon();
 /* responsive mobile */
 @media screen and (max-width: 739px)
 {
-    .poke-item
+    .poke-list
     {
-        width: calc(90%/2);
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+    }
+    .poke-search
+    {
+        width: 90%;
     }
 }
 /* responsive tablet */
 @media screen and (max-width: 1023px) and (min-width: 740px)
 {
-    .poke-item
+    .poke-list
     {
-        width: calc(90%/4);
+        display: grid;
+        grid-template-columns: repeat(4, auto);
     }
 }
 </style>
