@@ -2,20 +2,21 @@
 import { ref, computed } from 'vue';
 import { fetchPromise } from './utils';
 import { getIDPokemon } from './utils/getID';
+import PokemonDetail from './components/PokemonDetail.vue';
 import PokeItem from './components/PokeItem.vue';
-// ref state
+// REF STATE
 let filteredPokemons = ref([]);
 let offset = ref(0);
-let limit = 36;
+let showDetail = ref(true);
+let currentPoke = ref(null);
 const renderPokemons = computed(() => {
     return filteredPokemons.value.slice(offset, offset.value + limit);
 })
-// end ref state
-
+// END REF STATE
+let limit = 36;
+const pokePromise = [];
 let pokemons = JSON.parse(localStorage.getItem("pokemonsData")) || [];
 filteredPokemons.value = pokemons;
-
-//begin getPokemon (refresh website => localStorage ....)
 async function getPokemon()
 {
     if (pokemons.length) {
@@ -29,12 +30,35 @@ async function getPokemon()
         }
     }
 };
-// end getPokemon
-function handleSearch(event) 
+function fetchPokemonType() {
+    if (pokemons){
+        pokemons.forEach(pokemon => {
+            const promise = fetchPromise(pokemon.url);
+            pokePromise.push(promise);
+        });
+    }
+    return pokePromise;
+}
+async function getPokemonType()
 {
-    const query = event.target.value;
+    const pokeDataPromise = fetchPokemonType();
+    const pokeData = await Promise.all(pokeDataPromise);
+    pokeData.forEach((item, index) =>
+        {
+            if (pokemons[index]) {
+                pokemons[index].types = item.types.map(item => item.type.name);
+            }
+        }
+    )
+    filteredPokemons.value = [...pokemons];
+    localStorage.setItem("pokemonsData", JSON.stringify(pokemons));
+}
+getPokemonType();
+let queryValue = ref('');
+function handleSearch() 
+{
     filteredPokemons.value = pokemons.filter((pokemon) => {
-        return pokemon.name.includes(query.toLowerCase());
+        return pokemon.name.includes(queryValue.value.toLowerCase());
     })
     offset.value = 0;
 
@@ -43,21 +67,32 @@ function handleLoadMore()
 {
     offset.value += limit;
 }
-// end event handler function
 getPokemon();
+function detailPokemon(args)
+{
+    currentPoke.value = args;
+    showDetail.value = false;
+}
+function backDashboard()
+{
+    showDetail.value = true;
+}
 </script>
 
 <template>
-    <div class="container">
+    <div class="container" v-if="showDetail">
         <div class="header">
             <h2>Pokemon API</h2>
         </div>
-        <input type="text" placeholder="Search some Pokemon" class="poke-search" @input="handleSearch">
+        <input type="text" placeholder="Search some Pokemon" class="poke-search" v-model="queryValue" @input="handleSearch">
         <div class="poke-list">
-            <PokeItem v-for="pokemon in renderPokemons" :key="getIDPokemon(pokemon.url)" :pokemon="pokemon"/>
+            <PokeItem v-for="pokemon in renderPokemons" :key="getIDPokemon(pokemon.url)" :pokemon="pokemon" @select-pokemon="detailPokemon"/>
         </div>
         <button v-show="renderPokemons.length >= limit" class="load-page-btn" @click="handleLoadMore">Load More</button>
     </div>
+    <template v-else>
+        <PokemonDetail @back-dashboard="backDashboard" :pokemon="currentPoke"/>
+    </template>
 </template>
 
 <style>
@@ -119,6 +154,7 @@ getPokemon();
     padding: 20px 0;
     margin: 10px 5px;
     text-transform: capitalize;
+    cursor: pointer;
 }
 /* css pokemon types */
 .flex-types
