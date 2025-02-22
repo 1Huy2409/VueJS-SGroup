@@ -66,7 +66,7 @@ console.log(pokemonArray.value);
                     </div>
                 </div>
                 <div class="abilities">
-                    <div class="abilities-title">
+                    <div class="abilities-title title">
                         <p>Abilities</p>
                     </div>
                     <div class="abilities-box">
@@ -76,7 +76,7 @@ console.log(pokemonArray.value);
                     </div>
                 </div>
                 <div class="stats">
-                    <div class="stats-title">
+                    <div class="stats-title title">
                         <p>Stats</p>
                     </div>
                     <div class="stats-box">
@@ -87,7 +87,7 @@ console.log(pokemonArray.value);
                     </div>
                 </div>
                 <div class="evolution">
-                    <div class="evolution-title">
+                    <div class="evolution-title title">
                         <p>Evolution</p>
                     </div>
                     <div class="evolution-box">
@@ -106,8 +106,13 @@ console.log(pokemonArray.value);
 .button-back
 {
     position: fixed;
-    top: 50px;
-    left: 70px;
+    top: 5%;
+    left: 5%;
+    border-radius: 30px;
+    padding: 5px 10px;
+    box-shadow: #63636333 0 4px 8px;
+    border-color: transparent;
+    cursor: pointer;
 }
 .poke-item-detail
 {
@@ -119,6 +124,15 @@ console.log(pokemonArray.value);
     flex-direction: column;
     align-items: center;
 }
+.box-infor
+{
+    max-width: 500px;
+}
+.box-infor .description
+{
+    font-weight: 400;
+    font-size: 18px;
+}
 .item__image.detail
 {
     width: 200px;
@@ -127,6 +141,7 @@ console.log(pokemonArray.value);
 .item__name.detail
 {
     font-size: 24px;
+    text-transform: capitalize;
 }
 .evolution
 {
@@ -163,9 +178,23 @@ console.log(pokemonArray.value);
 }
 .size span, .ability-item
 {
-    padding: 4px 8px;
-    background-color: #ccc;
-    border-radius: 5px;
+    display: block;
+    width: 100px;
+    margin: 5px;
+    padding: 8px 4px;
+    background-color: #f6f8fc;
+    border-radius: 30px;
+    text-transform: capitalize;
+}
+.size p{
+    font-size: 20px;
+    font-weight: 550;
+}
+.title
+{
+    font-weight: 550;
+    font-size: 20px;
+    text-transform: capitalize;
 }
 .stats
 {
@@ -184,16 +213,30 @@ console.log(pokemonArray.value);
 {
     display: flex;
     flex-direction: column;
+    border-radius: 30px;
+    box-shadow: #63636333 0 2px 8px;
+    background-color: #f6f8fc;
+    padding: 5px;
+    margin: 5px;
 }
 .stat-name
 {
     border-radius: 50%;
+    padding: 2px;
     height: 30px;
     width: 30px;
-    background-color: #ccc;
     display: flex;
+    font-size: 12px;
     align-items: center;
     justify-content: center;
+    text-transform: uppercase;
+    color: white;
+}
+.evoItem-name
+{
+    text-transform: capitalize;
+    font-size: 18px;
+    font-weight: 500;
 }
 .hp
 {
