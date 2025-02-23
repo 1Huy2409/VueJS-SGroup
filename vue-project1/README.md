@@ -33,3 +33,5 @@ npm run build
 ```sh
 npm run lint
 ```
+### Deploy vercel 
+<b>https://vue-js-s-group.vercel.app/</b>
