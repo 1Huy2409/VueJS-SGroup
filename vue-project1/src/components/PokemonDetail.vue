@@ -1,18 +1,25 @@
 <script setup>
+// import { useRoute } from 'vue-router';
+
+// const route = useRoute();
 import { ref } from 'vue';
-import { getIDPokemon } from '@/utils/getID';
 import { fetchPromise } from '@/utils';
+import { getIDPokemon } from '@/utils/getID';
 import { getShortName } from '@/utils/shortStat';
-defineEmits(['back-dashboard']);
-const props = defineProps(['pokemon']);
+let pokemon = ref(null);
+let pokemonData = sessionStorage.getItem("clickedPokemon");
+if (pokemonData)
+{
+    pokemon.value = JSON.parse(pokemonData);
+}
 let dataPromise = ref(null);
 let dataEvolution = ref({});
 let currentDirect = ref({});
-const linkDesc = `https://pokeapi.co/api/v2/pokemon-species/${props.pokemon.name}`;
+const linkDesc = `https://pokeapi.co/api/v2/pokemon-species/${pokemon.value.name}`;
 async function fetchAPI ()
 {
-    if (props.pokemon) {
-        dataPromise.value = await fetchPromise(props.pokemon.url);
+    if (pokemon.value) {
+        dataPromise.value = await fetchPromise(pokemon.value.url);
         const descData = await fetchPromise(linkDesc);
         dataPromise.value.flavor_text = descData.flavor_text_entries[1].flavor_text;
         dataEvolution.value = await fetchPromise(descData.evolution_chain.url);
@@ -35,19 +42,18 @@ async function getEvolutionChain ()
     while (tmpDirect.evolves_to.length != 0);
 }
 getEvolutionChain();
-console.log(pokemonArray.value);
 </script>
 <template>
     <div>
-        <button @click="$emit('back-dashboard')" class="button-back">Back</button>
+        <RouterLink to ="/" class="button-back">Back</RouterLink>
         <div class="poke-item-detail">
-            <img class="item__image detail" :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getIDPokemon(props.pokemon.url)}.png`">
+            <img class="item__image detail" :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getIDPokemon(pokemon.url)}.png`">
             <div class="flex-types">
-                <div class="type-item" v-for="item in props.pokemon.types" :key="item" :class="item">
+                <div class="type-item" v-for="item in pokemon.types" :key="item" :class="item">
                     {{ item }}
                 </div>
             </div>
-            <h3 class="item__name detail">{{props.pokemon.name}}</h3>
+            <h3 class="item__name detail">{{pokemon.name}}</h3>
         </div>
         <div class="box-infor">
 
