@@ -7,6 +7,7 @@ import { fetchPromise } from '@/utils';
 import { getIDPokemon } from '@/utils/getID';
 import { getShortName } from '@/utils/shortStat';
 let pokemon = ref(null);
+let isLoading = ref(true);
 let pokemonData = sessionStorage.getItem("clickedPokemon");
 if (pokemonData)
 {
@@ -41,10 +42,20 @@ async function getEvolutionChain ()
     }
     while (tmpDirect.evolves_to.length != 0);
 }
-getEvolutionChain();
+async function getDataPokemon()
+{
+    await getEvolutionChain();
+    setTimeout(()=>{
+        isLoading.value = false;
+    }, 1000)
+}
+getDataPokemon();
 </script>
 <template>
-    <div>
+    <div v-if="isLoading" class="full-screen-div">
+        <p>Getting data from PokeDex...</p>
+    </div>
+    <div v-else>
         <RouterLink to ="/" class="button-back">Back</RouterLink>
         <div class="poke-item-detail">
             <img class="item__image detail" :src="`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getIDPokemon(pokemon.url)}.png`">
@@ -109,6 +120,16 @@ getEvolutionChain();
     </div>
 </template>
 <style>
+.full-screen-div
+{
+    height: 100vh;
+    width: 100vw;
+    /* text-align: center; */
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .button-back
 {
     position: fixed;

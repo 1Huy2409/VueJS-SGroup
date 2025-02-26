@@ -70,15 +70,6 @@ function handleLoadMore()
     offset.value += limit;
 }
 getPokemon();
-// function detailPokemon(args)
-// {
-//     currentPoke.value = args;
-//     showDetail.value = false;
-// }
-// function backDashboard()
-// {
-//     showDetail.value = true;
-// }
 </script>
 
 <template>
